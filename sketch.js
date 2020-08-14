@@ -13,12 +13,20 @@ var caType = "gameOfLife";
 var initState = "randomised";
 
 function setup() {
-  createCanvas(1318, 632);
-  w = 20;
-  // Calculate columns and rows
-  columns = floor(width / w);
-  rows = floor(height / w);
+  createCanvas(displayWidth, displayHeight);
+  setupGrid();
+}
 
+function setParam(){
+  w = createSlider(10, 50, 10);
+  w.position(20, 20);
+  // Calculate columns and rows
+  columns = floor((displayWidth) / w.value());
+  rows = floor((displayHeight) / w.value());
+}
+
+function setupGrid(){
+  setParam();
   // Wacky way to make a 2D array is JS
   board = new Array(columns);
   for (let i = 0; i < columns; i++) {
@@ -59,7 +67,6 @@ function initGen(){
       }
     }
   }
-
 }
 
 // to define all possible states of a cell corresponding to each CA type
@@ -100,18 +107,21 @@ function updateGrid(){
 
 // to represent the instantaneous cell states in a tangible form
 function represent(){
+  // update columns and rows
+  columns = floor((displayWidth) / w.value());
+  rows = floor((displayHeight) / w.value());
   for (let i = 0; i < columns; i++) {
     for (let j = 0; j < rows; j++) {
       fill(255-floor(255*board[i][j]/(possibleStates()-1)));
       stroke(0);
-      rect(i * w, j * w, w - 1, w - 1);
+      rect(i * w.value(), j * w.value(), w.value() - 1, w.value() - 1);
     }
   }
 }
-
 
 function swap() {
   let temp = board;
   board = next;
   next = temp;
 }
+
