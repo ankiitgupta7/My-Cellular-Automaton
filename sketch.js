@@ -10,19 +10,32 @@ let rows; // # of rows in canvas
 let board; // a 2D array to keep track of the cell data
 let next; // additional 2D array to be used for swapping data
 var caType = "gameOfLife";
-var initState = "randomised";
+var initState;
+let fr;
 
 function setup() {
-  createCanvas(displayWidth, displayHeight);
+  createCanvas(.95*displayWidth, .8*displayHeight);
   setupGrid();
+  frameRate(fr.value());
 }
 
 function setParam(){
-  w = createSlider(10, 50, 10);
-  w.position(20, 20);
+  // determine cell dimensions
+  w = createSlider(5, 50, 5);
+  w.position(20, 10);
   // Calculate columns and rows
-  columns = floor((displayWidth) / w.value());
-  rows = floor((displayHeight) / w.value());
+  columns = floor((.95*displayWidth) / w.value());
+  rows = floor((.8*displayHeight) / w.value());
+  // comboBox for initial state
+  initState = createSelect();
+  initState.position(20, 50);
+  initState.option("(i*j)%2==0");
+  initState.option("i%2==0 && j%2!=0");
+  initState.option("randomised");
+
+  // manage frame rate
+  fr = createSlider(1, 60, 20);
+  fr.position(20, 30);
 }
 
 function setupGrid(){
@@ -44,6 +57,7 @@ function setupGrid(){
 function draw() {
   background(255);
   updateGrid();
+  frameRate(fr.value());
   represent();
 }
 
@@ -55,7 +69,7 @@ function mousePressed() {
 // to intiate intial state of each cell corresponding to the possible states
 function initGen(){
   var n = possibleStates();
-  if(initState=="randomised")
+  if(initState.value()=="randomised")
   {
     for (let i = 0; i < columns; i++) {
       for (let j = 0; j < rows; j++) {
@@ -63,6 +77,26 @@ function initGen(){
         if (i == 0 || j == 0 || i == columns - 1 || j == rows - 1) board[i][j] = 0;
         // Filling the rest randomly
         else board[i][j] = floor(random(n));  // using processing's random function
+        next[i][j] = 0;
+      }
+    }
+  }
+  else if(initState.value()=="(i*j)%2==0")
+  {
+    for (let i = 0; i < columns; i++) {
+      for (let j = 0; j < rows; j++) {
+        if((i*j)%2==0){board[i][j]=1;}
+        else board[i][j] = 0;
+        next[i][j] = 0;
+      }
+    }
+  }
+  else if(initState.value()=="i%2==0 && j%2!=0")
+  {
+    for (let i = 0; i < columns; i++) {
+      for (let j = 0; j < rows; j++) {
+        if((i%j)%2==0){board[i][j]=1;}
+        else board[i][j] = 0;
         next[i][j] = 0;
       }
     }
@@ -108,8 +142,8 @@ function updateGrid(){
 // to represent the instantaneous cell states in a tangible form
 function represent(){
   // update columns and rows
-  columns = floor((displayWidth) / w.value());
-  rows = floor((displayHeight) / w.value());
+  columns = floor((.95*displayWidth) / w.value());
+  rows = floor((.8*displayHeight) / w.value());
   for (let i = 0; i < columns; i++) {
     for (let j = 0; j < rows; j++) {
       fill(255-floor(255*board[i][j]/(possibleStates()-1)));
